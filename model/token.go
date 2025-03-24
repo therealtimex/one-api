@@ -64,6 +64,16 @@ func ValidateUserToken(key string) (token *Token, err error) {
 		return nil, errors.New("未提供令牌")
 	}
 	token, err = CacheGetTokenByKey(key)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			h := sha256.New()
+			h.Write([]byte(key))
+			key := h.Sum(nil)
+	
+			token, err = CacheGetTokenByKey(key)
+		}
+	
 	if err != nil {
 		logger.SysError("CacheGetTokenByKey failed: " + err.Error())
 		if errors.Is(err, gorm.ErrRecordNotFound) {
