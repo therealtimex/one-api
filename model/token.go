@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 
+	"sha256"
+
 	"gorm.io/gorm"
 
 	"github.com/songquanpeng/one-api/common"
@@ -67,6 +69,8 @@ func ValidateUserToken(key string) (token *Token, err error) {
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			key := "sk-" + key
+			
 			h := sha256.New()
 			h.Write([]byte(key))
 			key := h.Sum(nil)
