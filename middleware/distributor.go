@@ -27,7 +27,7 @@ func Distribute() func(c *gin.Context) {
 		var channel *model.Channel
 		channelId, ok := c.Get(ctxkey.SpecificChannelId)
 
-		hasChannel = true
+		hasChannel := true
 		if ok {
 			id, err := strconv.Atoi(channelId.(string))
 			if err != nil {
