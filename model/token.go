@@ -4,7 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"sha256"
+	"crypto/sha256"
+        "encoding/hex"
 
 	"gorm.io/gorm"
 
@@ -61,6 +62,13 @@ func SearchUserTokens(userId int, keyword string) (tokens []*Token, err error) {
 	return tokens, err
 }
 
+func truncateString(s string, length int) string {
+	if len(s) > length {
+		return s[:length]
+	}
+	return s
+}
+
 func ValidateUserToken(key string) (token *Token, err error) {
 	if key == "" {
 		return nil, errors.New("未提供令牌")
@@ -69,15 +77,17 @@ func ValidateUserToken(key string) (token *Token, err error) {
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			key := "sk-" + key
-			
-			h := sha256.New()
+			key = "sk-" + key
+            logger.SysError("Test key: " + key)			
+    		h := sha256.New()
 			h.Write([]byte(key))
-			key := h.Sum(nil)
+            hashed := h.Sum(nil)
+            key = hex.EncodeToString(hashed)
+			key = truncateString(key, 48)
 	
 			token, err = CacheGetTokenByKey(key)
 		}
-	
+    }	
 	if err != nil {
 		logger.SysError("CacheGetTokenByKey failed: " + err.Error())
 		if errors.Is(err, gorm.ErrRecordNotFound) {

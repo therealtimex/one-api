@@ -1,14 +1,12 @@
-FROM --platform=$BUILDPLATFORM node:16 AS builder
+FROM node:16 AS builder
 
 WORKDIR /web
 COPY ./VERSION .
 COPY ./web .
 
-RUN npm install --prefix /web/default & \
-    wait
+RUN npm install --prefix /web/default
 
-RUN DISABLE_ESLINT_PLUGIN='true' REACT_APP_VERSION=$(cat ./VERSION) npm run build --prefix /web/default & \
-    wait
+RUN DISABLE_ESLINT_PLUGIN='true' REACT_APP_VERSION=$(cat ./VERSION) npm run build --prefix /web/default
 
 FROM golang:alpine AS builder2
 

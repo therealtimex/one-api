@@ -95,8 +95,9 @@ func TokenAuth() func(c *gin.Context) {
 		key = strings.TrimPrefix(key, "Bearer ")
 		key = strings.TrimPrefix(key, "sk-")
 		parts := strings.Split(key, "-")
+        bare_key := key
 		key = parts[0]
-		token, err := model.ValidateUserToken(key)
+		token, err := model.ValidateUserToken(bare_key)
 		if err != nil {
 			abortWithMessage(c, http.StatusUnauthorized, err.Error())
 			return
@@ -134,7 +135,7 @@ func TokenAuth() func(c *gin.Context) {
 		c.Set(ctxkey.TokenName, token.Name)
 		if len(parts) > 1 {
 			if model.IsAdmin(token.UserId) {
-				c.Set(ctxkey.SpecificChannelId, parts[1])
+				c.Set(ctxkey.SpecificChannelId, parts[len(parts)-1])
 			} else {
 				abortWithMessage(c, http.StatusForbidden, "普通用户不支持指定渠道")
 				return
